@@ -2,12 +2,13 @@
 
 This package contains register definitions and some utility functions for programming on AVR boards.
 
-Currently only the ATmega48P is supported, due to ressource limitations.
+Currently only the ATmega328P is supported, due to ressource limitations.
 
 Simply do
 
 ```julia
-using AVRDevices: Common, ATmega48P
+using AVRDevices: Common, ATmega328P
+using .Common, .ATmega328p
 ```
 
 and start programming! Each board has definitions for the individual registers.
