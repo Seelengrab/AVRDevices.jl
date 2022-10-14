@@ -11,7 +11,7 @@ using AVRDevices: Common, ATmega328P
 using .Common, .ATmega328p
 ```
 
-and start programming! Each board has definitions for the individual registers.
+or equivalent and start programming! Each board has definitions for the individual registers.
 
 The `Common` submodule has definitions for a `Register` struct, as well as some utility functions for loading/storing
 from them (and pointers) in a way such that LLVM does not eliminate the loads & stores.
