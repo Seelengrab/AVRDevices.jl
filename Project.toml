@@ -1,7 +1,7 @@
 name = "AVRDevices"
 uuid = "4f42d3e6-0c91-4298-90dc-d11e5ac190c1"
 authors = ["Sukera <Seelengrab@users.noreply.github.com>"]
-version = "0.2.1"
+version = "0.3.0"
 
 [compat]
 julia = "1.6"
