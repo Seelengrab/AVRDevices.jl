@@ -1,6 +1,6 @@
 module Common
 
-export Register, volatile_load, volatile_store!, keep
+export Register, volatile_load, volatile_store!, keep, delay_ms, delay_us, delay
 
 CPU_FREQUENCY_HZ() = 16_000_000 # this value can be set to a new one by redefining this function
 
