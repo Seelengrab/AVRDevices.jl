@@ -2,6 +2,8 @@ module Common
 
 export Register, volatile_load, volatile_store!, keep
 
+CPU_FREQUENCY_HZ() = 16_000_000 # this value can be set to a new one by redefining this function
+
 struct Register{T <: Base.BitInteger}
     ptr::Ptr{T}
     Register{T}(x::Ptr{T}) where T = new{T}(x)
@@ -107,5 +109,45 @@ end
 
 Base.getindex(r::Register) = volatile_load(r)
 Base.setindex!(r::Register{T}, v::T) where T = volatile_store!(r, v)
+
+
+# delay functionality transpiled from
+# https://github.com/avr-rust/delay/blob/master/src/lib.rs
+delay_ms(ms::Int) = delay_us(ms * 1000)
+
+function delay_us(us::Int)
+    us_in_loop = (CPU_FREQUENCY_HZ() ÷ 1000000 ÷ 4)
+    loops = us * us_in_loop
+    delay(loops)
+end
+
+function delay(count::Int)
+    outer_count = count ÷ 65536
+    rest_count = ((count % 65536) + 1) % UInt16
+    for _ in 0:outer_count
+        z = zero(UInt16)
+        while true
+            keep(z)
+            z -= one(z)
+            iszero(z) && break
+        end
+    end
+    while true
+        keep(rest_count)
+        rest_count -= one(rest_count)
+        iszero(rest_count) && break
+    end
+    # Base.llvmcall(
+    #     """
+    #     call void asm "1:
+    #                      sbiw \$0, 1
+    #                      brne 1b", "=X,~{memory}"(i16 %0)
+    #     ret void
+    #     """,
+    #     Cvoid,
+    #     Tuple{UInt16},
+    #     rest_count
+    # )
+end
 
 end # module
