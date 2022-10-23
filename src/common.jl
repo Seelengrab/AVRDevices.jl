@@ -1,13 +1,54 @@
 module Common
 
-export Register, volatile_load, volatile_store!, keep, delay_ms, delay_us, delay
+export Register, RegisterBits, Pin, volatile_load, volatile_store!, keep, delay_ms, delay_us, delay
 
 CPU_FREQUENCY_HZ() = 16_000_000 # this value can be set to a new one by redefining this function
 
-struct Register{T <: Base.BitInteger}
+struct Register{Reg, T <: Base.BitInteger}
     ptr::Ptr{T}
-    Register{T}(x::Ptr{T}) where T = new{T}(x)
-    Register{T}(x::Base.BitInteger) where T = new{T}(Ptr{T}(x % UInt)) # Ptr only takes Union{Int, UInt, Ptr}...
+    Register{Reg, T}(x::Ptr{T}) where {Reg, T} = new{Reg, T}(x)
+    Register{Reg, T}(x::Base.BitInteger) where {Reg, T} = new{Reg, T}(Ptr{T}(x % UInt)) # Ptr only takes Union{Int, UInt, Ptr}...
+end
+
+struct RegisterBits{Reg, T}
+    bits::T
+end
+
+struct Pin{RT, Reg, Bit, Mask}
+    function Pin{Reg, bit}() where {Reg, bit}
+        T = typeof(Reg)
+        mask = eltype(Reg)(1 << (bit - 1))
+        new{T, Reg, bit, mask}()
+    end
+end
+
+Base.eltype(::Type{R}) where {Reg, T, R <: Register{Reg, T}} = T
+
+# Base.getindex(r::Register) = volatile_load(r)
+# Base.setindex!(r::Register{Reg, T}, rb::RegisterBits{Reg, T}) where {Reg, T} = volatile_store!(r, rb.bits)
+# Base.setindex!(r::RT, p::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = volatile_store!(r, m)
+
+# Base.:(|)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits | rbb.bits)
+# Base.:(&)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits & rbb.bits)
+# Base.xor(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(xor(rba.bits, rbb.bits))
+# Base.:(~)(rb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(~rb.bits)
+
+# Base.:(|)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma | mb)
+# Base.:(&)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma & mb)
+# Base.:(~)(::Pin{RT, Reg, ba, ma}) where {R, T, RT<:Register{R,T}, Reg, ba, ma} = RegisterBits{R, T}(~mb)
+
+# Base.:(|)(p::Pin, rb::RegisterBits) = rb | p
+# Base.:(|)(rb::RegisterBits{R, T}, p::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits | m)
+# Base.:(&)(p::Pin, rb::RegisterBits) = rb & p
+# Base.:(&)(rb::RegisterBits{R, T}, p::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits & m)
+
+Base.getindex(p::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = (volatile_load(Reg) & m) != zero(m)
+function Base.setindex!(p::Pin{Register{R, T}, Reg, b, m}, val::Bool) where {R, T, Reg, b, m}
+    cur = volatile_load(Reg)
+
+    res = ifelse(val, cur | T(1 << b), cur & ~T(1 << b))
+
+    return volatile_store!(Reg, res)
 end
 
 # gracefullly stolen from VectorizationBase.jl
@@ -24,7 +65,7 @@ const LLVM_TYPES = IdDict{Type{<:Union{Bool,Base.HWReal,Float16}},String}(
   Int32 => "i32",
   UInt32 => "i32",
   Int64 => "i64",
-  UInt64 => "i64",
+  UInt64 => "i64"
   # Int128 => "i128", # let's not worry about these
   # UInt128 => "i128",
   # UInt256 => "i256",
@@ -57,7 +98,7 @@ which makes this a no-op in the final assembly.
 """
 function keep end
 
-volatile_store!(x::Register{T}, v::T) where T = volatile_store!(x.ptr, v)
+volatile_store!(x::Register{Reg, T}, v::T) where {Reg, T} = volatile_store!(x.ptr, v)
 volatile_load(x::Register) = volatile_load(x.ptr)
 
 for T in keys(LLVM_TYPES)
@@ -106,10 +147,6 @@ for T in keys(LLVM_TYPES)
     end)
     @eval $k
 end
-
-Base.getindex(r::Register) = volatile_load(r)
-Base.setindex!(r::Register{T}, v::T) where T = volatile_store!(r, v)
-
 
 # delay functionality transpiled from
 # https://github.com/avr-rust/delay/blob/master/src/lib.rs

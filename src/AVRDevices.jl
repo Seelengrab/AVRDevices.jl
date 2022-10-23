@@ -2,10 +2,8 @@ module AVRDevices
 
 include("common.jl")
 
-for path in readdir(@__DIR__)
-    (!isfile(joinpath(@__DIR__, path)) || path in ("AVRDevices.jl", "common.jl")) && continue
-
-    include(path)
+for path in readdir(joinpath(@__DIR__, "devices"))
+    include(joinpath("devices", path, path*".jl"))
 end
 
 end # module AVRDevices
