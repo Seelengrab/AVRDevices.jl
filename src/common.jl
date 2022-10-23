@@ -24,23 +24,23 @@ end
 
 Base.eltype(::Type{R}) where {Reg, T, R <: Register{Reg, T}} = T
 
-# Base.getindex(r::Register) = volatile_load(r)
-# Base.setindex!(r::Register{Reg, T}, rb::RegisterBits{Reg, T}) where {Reg, T} = volatile_store!(r, rb.bits)
-# Base.setindex!(r::RT, p::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = volatile_store!(r, m)
+Base.getindex(r::Register) = volatile_load(r)
+Base.setindex!(r::Register{Reg, T}, rb::RegisterBits{Reg, T}) where {Reg, T} = volatile_store!(r, rb.bits)
+Base.setindex!(r::RT, p::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = volatile_store!(r, m)
 
-# Base.:(|)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits | rbb.bits)
-# Base.:(&)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits & rbb.bits)
-# Base.xor(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(xor(rba.bits, rbb.bits))
-# Base.:(~)(rb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(~rb.bits)
+Base.:(|)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits | rbb.bits)
+Base.:(&)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits & rbb.bits)
+Base.xor(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(xor(rba.bits, rbb.bits))
+Base.:(~)(rb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(~rb.bits)
 
-# Base.:(|)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma | mb)
-# Base.:(&)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma & mb)
-# Base.:(~)(::Pin{RT, Reg, ba, ma}) where {R, T, RT<:Register{R,T}, Reg, ba, ma} = RegisterBits{R, T}(~mb)
+Base.:(|)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma | mb)
+Base.:(&)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma & mb)
+Base.:(~)(::Pin{RT, Reg, ba, ma}) where {R, T, RT<:Register{R,T}, Reg, ba, ma} = RegisterBits{R, T}(~mb)
 
-# Base.:(|)(p::Pin, rb::RegisterBits) = rb | p
-# Base.:(|)(rb::RegisterBits{R, T}, p::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits | m)
-# Base.:(&)(p::Pin, rb::RegisterBits) = rb & p
-# Base.:(&)(rb::RegisterBits{R, T}, p::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits & m)
+Base.:(|)(p::Pin, rb::RegisterBits) = rb | p
+Base.:(|)(rb::RegisterBits{R, T}, p::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits | m)
+Base.:(&)(p::Pin, rb::RegisterBits) = rb & p
+Base.:(&)(rb::RegisterBits{R, T}, p::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits & m)
 
 Base.getindex(p::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = (volatile_load(Reg) & m) != zero(m)
 function Base.setindex!(p::Pin{Register{R, T}, Reg, b, m}, val::Bool) where {R, T, Reg, b, m}
