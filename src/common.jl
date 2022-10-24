@@ -26,7 +26,7 @@ Base.eltype(::Type{R}) where {Reg, T, R <: Register{Reg, T}} = T
 
 Base.getindex(r::Register) = volatile_load(r)
 Base.setindex!(r::Register{Reg, T}, rb::RegisterBits{Reg, T}) where {Reg, T} = volatile_store!(r, rb.bits)
-Base.setindex!(r::RT, p::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = volatile_store!(r, m)
+Base.setindex!(r::RT, _::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = volatile_store!(r, m)
 
 Base.:(|)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits | rbb.bits)
 Base.:(&)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits & rbb.bits)
@@ -35,15 +35,15 @@ Base.:(~)(rb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(~rb.bi
 
 Base.:(|)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma | mb)
 Base.:(&)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma & mb)
-Base.:(~)(::Pin{RT, Reg, ba, ma}) where {R, T, RT<:Register{R,T}, Reg, ba, ma} = RegisterBits{R, T}(~mb)
+Base.:(~)(::Pin{RT, Reg, ba, ma}) where {R, T, RT<:Register{R,T}, Reg, ba, ma} = RegisterBits{R, T}(~ma)
 
 Base.:(|)(p::Pin, rb::RegisterBits) = rb | p
-Base.:(|)(rb::RegisterBits{R, T}, p::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits | m)
+Base.:(|)(rb::RegisterBits{R, T}, _::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits | m)
 Base.:(&)(p::Pin, rb::RegisterBits) = rb & p
-Base.:(&)(rb::RegisterBits{R, T}, p::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits & m)
+Base.:(&)(rb::RegisterBits{R, T}, _::Pin{RT, Reg, b, m}) where {R, T, RT<:Register{R,T}, Reg, b, m} = RegisterBits{R, T}(rb.bits & m)
 
-Base.getindex(p::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = (volatile_load(Reg) & m) != zero(m)
-function Base.setindex!(p::Pin{Register{R, T}, Reg, b, m}, val::Bool) where {R, T, Reg, b, m}
+Base.getindex(_::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = (volatile_load(Reg) & m) != zero(m)
+function Base.setindex!(_::Pin{Register{R, T}, Reg, b, m}, val::Bool) where {R, T, Reg, b, m}
     cur = volatile_load(Reg)
 
     res = ifelse(val, cur | T(1 << b), cur & ~T(1 << b))
@@ -109,20 +109,22 @@ for T in keys(LLVM_TYPES)
           ret void
           """
     vs = :(function volatile_store!(x::Ptr{$T}, v::$T)
+        @inline
         return Base.llvmcall(
             $store,
             Cvoid,
             Tuple{Ptr{$T},$T},
-            x.ptr,
+            x,
             v
         )
     end)
     load = """
            %ptr = inttoptr i64 %0 to $ptrs*
-           %val = load volatile $ptrs, ptr %ptr, align 1
+           %val = load volatile $ptrs, $ptrs* %ptr, align 1
            ret $ptrs %val
            """
     ld = :(function volatile_load(x::Ptr{$T})
+        @inline
         return Base.llvmcall(
             $load,
             $T,
@@ -138,6 +140,7 @@ for T in keys(LLVM_TYPES)
           ret void
           """
     k = :(function keep(x::$T)
+        @inline
         return Base.llvmcall(
             $str,
             Cvoid,
@@ -150,41 +153,45 @@ end
 
 # delay functionality transpiled from
 # https://github.com/avr-rust/delay/blob/master/src/lib.rs
-delay_ms(ms::Int) = delay_us(ms * 1000)
+delay_ms(m::Int) = delay_ms(reinterpret(UInt, m))
+delay_ms(ms::UInt) = delay_us(ms * 1000)
 
-function delay_us(us::Int)
+delay_us(m::Int) = delay_us(reinterpret(UInt, m))
+function delay_us(us::UInt)
     us_in_loop = (CPU_FREQUENCY_HZ() ÷ 1000000 ÷ 4)
     loops = us * us_in_loop
     delay(loops)
 end
 
-function delay(count::Int)
-    outer_count = count ÷ 65536
+delay(m::Int) = delay(reinterpret(UInt, m))
+@inline function delay(count::UInt)
+    outer_count = (count ÷ 65536) % UInt16
     rest_count = ((count % 65536) + 1) % UInt16
-    for _ in 0:outer_count
-        z = zero(UInt16)
-        while true
-            keep(z)
-            z -= one(z)
-            iszero(z) && break
-        end
+    for y in one(outer_count):outer_count
+        keep(y)
+        Base.llvmcall(
+            """
+            %X = call i16 asm sideeffect "1:
+                             sbiw \$0, 1
+                             brne 1b", "=X,0"(i16 %0)
+            ret void
+            """,
+            Cvoid,
+            Tuple{UInt16},
+            zero(UInt16)
+        )
     end
-    while true
-        keep(rest_count)
-        rest_count -= one(rest_count)
-        iszero(rest_count) && break
-    end
-    # Base.llvmcall(
-    #     """
-    #     call void asm "1:
-    #                      sbiw \$0, 1
-    #                      brne 1b", "=X,~{memory}"(i16 %0)
-    #     ret void
-    #     """,
-    #     Cvoid,
-    #     Tuple{UInt16},
-    #     rest_count
-    # )
+    Base.llvmcall(
+        """
+        %X = call i16 asm sideeffect "1:
+                         sbiw \$0, 1
+                         brne 1b", "=X,0"(i16 %0)
+        ret void
+        """,
+        Cvoid,
+        Tuple{UInt16},
+        rest_count
+    )
 end
 
 end # module
