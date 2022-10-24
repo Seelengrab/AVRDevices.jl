@@ -1,0 +1,8 @@
+name = "blink_led"
+uuid = "9e4578f9-3a89-4ae5-9372-7662c85a8e6e"
+authors = ["Sukera <Seelengrab@users.noreply.github.com>"]
+version = "0.1.0"
+
+[deps]
+AVRCompiler = "680192cc-e9a1-4318-adc5-b31ee40f6b9b"
+AVRDevices = "4f42d3e6-0c91-4298-90dc-d11e5ac190c1"
