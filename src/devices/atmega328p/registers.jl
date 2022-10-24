@@ -10,9 +10,9 @@ export PINB, DDRB, PORTB, PINC, DDRC, PORTC, PIND, DDRD, PORTD, TIFR0,
 
 const Ru8{R} = Register{R, UInt8}
 
-const PINB   = Ru8{:PINB}(0x03)
-const DDRB   = Ru8{:DDRB}(0x04)
-const PORTB  = Ru8{:PORTB}(0x05)
+const PINB   = Ru8{:PINB}(0x23)
+const DDRB   = Ru8{:DDRB}(0x24)
+const PORTB  = Ru8{:PORTB}(0x25)
 
 for p in 0:7
     _p = p+1
@@ -27,9 +27,9 @@ for p in 0:7
     end
 end
 
-const PINC   = Ru8{:PINC}(0x06)
-const DDRC   = Ru8{:DDRC}(0x07)
-const PORTC  = Ru8{:PORTC}(0x08)
+const PINC   = Ru8{:PINC}(0x26)
+const DDRC   = Ru8{:DDRC}(0x27)
+const PORTC  = Ru8{:PORTC}(0x28)
 
 for p in 0:6
     pinc  = Symbol(:PINC,  p)
@@ -43,9 +43,9 @@ for p in 0:6
     end
 end
 
-const PIND   = Ru8{:PIND}(0x09)
-const DDRD   = Ru8{:DDRD}(0x0A)
-const PORTD  = Ru8{:PORTD}(0x0B)
+const PIND   = Ru8{:PIND}(0x29)
+const DDRD   = Ru8{:DDRD}(0x2a)
+const PORTD  = Ru8{:PORTD}(0x2b)
 
 for p in 0:7
     _p = p+1
@@ -60,9 +60,9 @@ for p in 0:7
     end
 end
 
-const TIFR0  = Ru8{:TIFR0}(0x15)
-const TIFR1  = Ru8{:TIFR1}(0x16)
-const TIFR2  = Ru8{:TIFR2}(0x17)
+const TIFR0  = Ru8{:TIFR0}(0x35)
+const TIFR1  = Ru8{:TIFR1}(0x36)
+const TIFR2  = Ru8{:TIFR2}(0x37)
 
 for p in 0:2
     tov = Symbol(:TOV, p)
@@ -78,7 +78,7 @@ for p in 0:2
 end
 const ICF1 = Pin{TIFR1, 6}()
 
-const PCIFR  = Ru8{:PCIFR}(0x1B)
+const PCIFR  = Ru8{:PCIFR}(0x3b)
 
 for p in 0:2
     pcif = Symbol(:PCIF, p)
@@ -88,8 +88,8 @@ for p in 0:2
     end
 end
 
-const EIFR   = Ru8{:EIFR}(0x1C)
-const EIMSK  = Ru8{:EIMSK}(0x1D)
+const EIFR   = Ru8{:EIFR}(0x3c)
+const EIMSK  = Ru8{:EIMSK}(0x3d)
 
 for p in 0:1
     _p = p+1
@@ -102,8 +102,8 @@ for p in 0:1
     end
 end
 
-const GPIOR0 = Ru8{:GPIOR0}(0x1E)
-const EECR   = Ru8{:EECR}(0x1F)
+const GPIOR0 = Ru8{:GPIOR0}(0x3e)
+const EECR   = Ru8{:EECR}(0x3f)
 
 const EERE   = Pin{EECR, 1}()
 const EEPE   = Pin{EECR, 2}()
@@ -113,18 +113,18 @@ const EEPM0  = Pin{EECR, 5}()
 const EEPM1  = Pin{EECR, 6}()
 export EERE, EEPE, EEMPTE, EERIE, EEPM0, EEPM1
 
-const EEDR   = Ru8{:EEDR}(0x20)
-const EEARL  = Ru8{:EEARL}(0x21)
-const EEARH  = Ru8{:EEARH}(0x22)
+const EEDR   = Ru8{:EEDR}(0x40)
+const EEARL  = Ru8{:EEARL}(0x41)
+const EEARH  = Ru8{:EEARH}(0x42)
 
-const GTCCR  = Ru8{:GTCCR}(0x23)
+const GTCCR  = Ru8{:GTCCR}(0x43)
 
 const PSRSYNC = Pin{GTCCR, 1}()
 const PSRASY  = Pin{GTCCR, 2}()
 const TSM     = Pin{GTCCR, 8}()
 export PSRSYNC, PSRASY, TSM
 
-const TCCR0A = Ru8{:TCCR0A}(0x24)
+const TCCR0A = Ru8{:TCCR0A}(0x44)
 
 const WGM00  = Pin{TCCR0A, 1}()
 const WGM01  = Pin{TCCR0A, 2}()
@@ -134,7 +134,7 @@ const COM0A0 = Pin{TCCR0A, 7}()
 const COM0A1 = Pin{TCCR0A, 8}()
 export WGM00, WGM01, COM0B0, COM0B1, COM0A0, COM0A1
 
-const TCCR0B = Ru8{:TCCR0B}(0x25)
+const TCCR0B = Ru8{:TCCR0B}(0x45)
 
 const CS00  = Pin{TCCR0B, 1}()
 const CS01  = Pin{TCCR0B, 2}()
@@ -144,14 +144,14 @@ const FOC0B = Pin{TCCR0B, 7}()
 const FOC0A = Pin{TCCR0B, 8}()
 export CS00, CS01, CS02, WGM02, FOC0B, FOC0A
 
-const TCNT0  = Ru8{:TCNT0}(0x26)
-const OCR0A  = Ru8{:OCR0A}(0x27)
-const OCR0B  = Ru8{:OCR0B}(0x28)
+const TCNT0  = Ru8{:TCNT0}(0x46)
+const OCR0A  = Ru8{:OCR0A}(0x47)
+const OCR0B  = Ru8{:OCR0B}(0x48)
 
-const GPIOR1 = Ru8{:GPIOR1}(0x2A)
-const GPIOR2 = Ru8{:GPIOR2}(0x2B)
+const GPIOR1 = Ru8{:GPIOR1}(0x4a)
+const GPIOR2 = Ru8{:GPIOR2}(0x4b)
 
-const SPCR   = Ru8{:SPCR}(0x2C)
+const SPCR   = Ru8{:SPCR}(0x4c)
 
 const SPR0 = Pin{SPCR, 1}()
 const SPR1 = Pin{SPCR, 2}()
@@ -163,14 +163,14 @@ const SPE  = Pin{SPCR, 7}()
 const SPIE = Pin{SPCR, 8}()
 export SPR0, SPR1, CPHA, CPOL, MSTR, DORD, SPE, SPIE
 
-const SPSR   = Ru8{:SPSR}(0x2D)
+const SPSR   = Ru8{:SPSR}(0x4d)
 
 const SPI2X = Pin{SPSR, 1}()
 const WCOL  = Pin{SPSR, 7}()
 const SPIF  = Pin{SPSR, 8}()
 export SPI2C, WCOL, SPIF
 
-const SPDR   = Ru8{:SPDR}(0x2E)
+const SPDR   = Ru8{:SPDR}(0x4e)
 
 for p in 0:7
     _p = p+1
@@ -198,7 +198,7 @@ for p in 0:7
     end
 end
 
-const ACSR   = Ru8{:ACSR}(0x30)
+const ACSR   = Ru8{:ACSR}(0x50)
 
 const ACIS0 = Pin{ACSR, 1}()
 const ACIS1 = Pin{ACSR, 2}()
@@ -210,7 +210,7 @@ const ACBG  = Pin{ACSR, 7}()
 const ACD   = Pin{ACSR, 8}()
 export ACIS0, ACIS1, ACIC, ACIE, ACI, ACO, ACBG, ACD
 
-const SMCR   = Ru8{:SMCR}(0x33)
+const SMCR   = Ru8{:SMCR}(0x53)
 
 const SE  = Pin{SMCR, 1}()
 const SM0 = Pin{SMCR, 2}()
@@ -218,7 +218,7 @@ const SM1 = Pin{SMCR, 3}()
 const SM2 = Pin{SMCR, 4}()
 export SE, SM0, SM1, SM2
 
-const MCUSR  = Ru8{:MCUSR}(0x34)
+const MCUSR  = Ru8{:MCUSR}(0x54)
 
 const PORF  = Pin{MCUSR, 1}()
 const EXTRF = Pin{MCUSR, 2}()
@@ -226,7 +226,7 @@ const BORF  = Pin{MCUSR, 3}()
 const WDRF  = Pin{MCUSR, 4}()
 export PORF, EXTR, BORF, WDRF
 
-const MCUCR  = Ru8{:MCUCR}(0x34)
+const MCUCR  = Ru8{:MCUCR}(0x55)
 
 const IVCE  = Pin{MCUCR, 1}()
 const IVSEL = Pin{MCUCR, 2}()
@@ -235,7 +235,7 @@ const BODSE = Pin{MCUCR, 4}()
 const BODS  = Pin{MCUCR, 5}()
 export IVCE, IVSEL, PUD, BODSE, BODS
 
-const SPMCSR = Ru8{:SPMCSR}(0x37)
+const SPMCSR = Ru8{:SPMCSR}(0x57)
 
 const SPMEN  = Pin{SPMCSR, 1}()
 const PGERS  = Pin{SPMCSR, 2}()
@@ -247,7 +247,7 @@ const RWWSB  = Pin{SPMCSR, 7}()
 const SPMIE  = Pin{SPMCSR, 8}()
 export SPMEN, PGERS, PGWRT, BLBSET, RWWSRE, SIGRD, RWWSB, SPMIE
 
-const SPL    = Ru8{:SPL}(0x3D)
+const SPL    = Ru8{:SPL}(0x5d)
 
 for p in 0:7
     _p = p+1
@@ -258,14 +258,14 @@ for p in 0:7
     end
 end
 
-const SPH = Ru8{:SPH}(0x3E)
+const SPH = Ru8{:SPH}(0x5e)
 
 const SP8  = Pin{SPH, 1}()
 const SP9  = Pin{SPH, 2}()
 const SP10 = Pin{SPH, 3}()
 export SP8, SP9, SP10
 
-const SREG   = Ru8{:SREG}(0x3F)
+const SREG   = Ru8{:SREG}(0x5f)
 
 const C = Pin{SREG, 1}()
 const Z = Pin{SREG, 2}()
