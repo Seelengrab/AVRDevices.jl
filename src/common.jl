@@ -25,6 +25,7 @@ end
 Base.eltype(::Type{R}) where {Reg, T, R <: Register{Reg, T}} = T
 
 Base.getindex(r::Register) = volatile_load(r)
+Base.setindex!(r::Register{Reg, T}, data::T) where {Reg, T} = volatile_store!(r, data)
 Base.setindex!(r::Register{Reg, T}, rb::RegisterBits{Reg, T}) where {Reg, T} = volatile_store!(r, rb.bits)
 Base.setindex!(r::RT, _::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = volatile_store!(r, m)
 
