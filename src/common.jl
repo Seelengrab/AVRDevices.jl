@@ -1,6 +1,6 @@
 module Common
 
-export Register, RegisterBits, Pin, volatile_load, volatile_store!, keep, delay_ms, delay_us, delay
+export Register, RegisterBits, Pin, volatile_load, volatile_store!, keep, delay_ms, delay_us, delay, CPU_FREQUENCY_HZ
 
 CPU_FREQUENCY_HZ() = 16_000_000 # this value can be set to a new one by redefining this function
 
