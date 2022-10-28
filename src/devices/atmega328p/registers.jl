@@ -584,15 +584,15 @@ export MPCM0, U2X0, UPE0, DOR0, FE0, UDRE0, TXC0, RXC0
 
 const UCSR0B = Ru8{:UCSR0B}(0xC1)
 
-const TXDB80 = Pin{UCSR0B, 1}()
-const RXD80  = Pin{UCSR0B, 2}()
+const TXB80 = Pin{UCSR0B, 1}()
+const RX80  = Pin{UCSR0B, 2}()
 const UCSZ02 = Pin{UCSR0B, 3}()
 const TXEN0  = Pin{UCSR0B, 4}()
 const RXEN0  = Pin{UCSR0B, 5}()
 const UDRIE0 = Pin{UCSR0B, 6}()
 const TXCIE0 = Pin{UCSR0B, 7}()
 const RXCIE0 = Pin{UCSR0B, 8}()
-export TXDB80, RXD80, UCSZ02, TXEN0, RXEN0, UDRIE0, TXCIE0, RXCIE0
+export TXB80, RXB80, UCSZ02, TXEN0, RXEN0, UDRIE0, TXCIE0, RXCIE0
 
 const UCSR0C = Ru8{:UCSR0C}(0xC2)
 
