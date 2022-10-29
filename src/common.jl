@@ -23,6 +23,7 @@ struct Pin{RT, Reg, Bit, Mask}
 end
 
 Base.eltype(::Type{R}) where {Reg, T, R <: Register{Reg, T}} = T
+Base.zero(::Register{R, T}) where {R, T} = RegisterBits{R, T}(zero(T))
 
 Base.getindex(r::Register) = volatile_load(r)
 Base.setindex!(r::Register{Reg, T}, data::T) where {Reg, T} = volatile_store!(r, data)
