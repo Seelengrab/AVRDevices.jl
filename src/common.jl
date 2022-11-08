@@ -32,11 +32,21 @@ Base.setindex!(r::RT, _::Pin{RT, Reg, b, m}) where {RT, Reg, b, m} = volatile_st
 
 Base.:(|)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits | rbb.bits)
 Base.:(&)(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(rba.bits & rbb.bits)
+Base.:(|)(rbb::RegisterBits{Reg, T}, v::T) where {Reg, T} = RegisterBits{Reg, T}(v | rbb.bits)
+Base.:(&)(rbb::RegisterBits{Reg, T}, v::T) where {Reg, T} = RegisterBits{Reg, T}(v & rbb.bits)
+Base.:(|)(v::T, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(v | rbb.bits)
+Base.:(&)(v::T, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(v & rbb.bits)
 Base.xor(rba::RegisterBits{Reg, T}, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(xor(rba.bits, rbb.bits))
+Base.xor(rbb::RegisterBits{Reg, T}, v::T) where {Reg, T} = RegisterBits{Reg, T}(xor(v, rbb.bits))
+Base.xor(v::T, rbb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(xor(v, rbb.bits))
 Base.:(~)(rb::RegisterBits{Reg, T}) where {Reg, T} = RegisterBits{Reg, T}(~rb.bits)
 
 Base.:(|)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma | mb)
 Base.:(&)(::Pin{RT, Reg, ba, ma}, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, ba, bb, ma, mb} = RegisterBits{R, T}(ma & mb)
+Base.:(|)(::Pin{RT, Reg, bb, mb}, v::T) where {R, T, RT <: Register{R, T}, Reg, bb, mb} = RegisterBits{R, T}(v | mb)
+Base.:(&)(::Pin{RT, Reg, bb, mb}, v::T) where {R, T, RT <: Register{R, T}, Reg, bb, mb} = RegisterBits{R, T}(v & mb)
+Base.:(|)(v::T, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, bb, mb} = RegisterBits{R, T}(v | mb)
+Base.:(&)(v::T, ::Pin{RT, Reg, bb, mb}) where {R, T, RT <: Register{R, T}, Reg, bb, mb} = RegisterBits{R, T}(v & mb)
 Base.:(~)(::Pin{RT, Reg, ba, ma}) where {R, T, RT<:Register{R,T}, Reg, ba, ma} = RegisterBits{R, T}(~ma)
 
 Base.:(|)(p::Pin, rb::RegisterBits) = rb | p
