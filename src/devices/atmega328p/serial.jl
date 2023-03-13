@@ -66,8 +66,8 @@ struct USART0{N} <: IO
 end
 USART0(;kwargs...) = USART0{0x8}(;kwargs...)
 
-Base.lock(_::USART0) = return # there is no exclusivity here
-Base.unlock(_::USART0) = return # there is no exclusivity here
+Base.lock(_::USART0) = return nothing # there is no exclusivity here
+Base.unlock(_::USART0) = return nothing # there is no exclusivity here
 
 function _write_byte(::USART0{N}, b::UInt8, ninth::Bool) where N
     while !UDRE0[] end # wait until we can send
@@ -106,17 +106,21 @@ function _write_int(u::USART0{N}, x::T) where {N, T <: Base.BitInteger}
     nloops
 end
 
-function Base.write(u::USART0{N}, vec::T) where {N, T <: AbstractVector{UInt8}}
+Base.write(u::USART0, s::String) = write(u, codeunits(s))
+Base.write(u::USART0{N}, vec::T) where {N, T <: AbstractVector{UInt8}}         = _write(u, vec)
+Base.write(u::USART0{N}, vec::T) where {N, T <: Base.CodeUnits{UInt8, String}} = _write(u, vec)
+
+function _write(u::USART0{N}, vec::T) where {N, T}
     wr = 0x0
     isempty(vec) && return wr
     if N != 0x9 # easy case
-        data = vec[0x1]
+        data = @inbounds vec[0x1]
         wr += write(u, data)
         data <<= N
         idx = 0x1
         while idx < lastindex(vec)
             idx += 0x1
-            el = vec[idx]
+            el = @inbounds vec[idx]
             data |= el >> (0x8 - N)
             wr += write(u, data)
             data = el << N
@@ -127,7 +131,15 @@ function Base.write(u::USART0{N}, vec::T) where {N, T <: AbstractVector{UInt8}}
     wr
 end
 
-Base.write(u::USART0, s::String) = write(u, codeunits(s))
+# we don't have locking here and `try`/`catch` of the Base version
+# doesn't work yet
+function Base.print(io::USART0, x::T...) where T
+    for x in xs
+        print(io, x)
+    end
+    return nothing
+end
 
+Base.print(u::USART0, s::String) = (write(u, s); nothing)
 
 end
