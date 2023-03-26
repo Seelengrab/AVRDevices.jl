@@ -1,0 +1,4 @@
+name = "ping_pong"
+uuid = "a0d32ab2-2970-4709-9fef-fd27a6baad11"
+authors = ["Sukera <Seelengrab@users.noreply.github.com>"]
+version = "0.1.0"
