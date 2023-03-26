@@ -8,10 +8,10 @@ const MOTD = "The message of the day is: https://www.youtube.com/watch?v=cEzcFXR
 function main()
     s = USART0()
 
-    # while true
-        write(s, "f")
-        # delay_ms(1000)
-    # end
+    while true
+        write(s, MOTD)
+        delay_ms(1000)
+    end
 end
 
 end # module motd_example

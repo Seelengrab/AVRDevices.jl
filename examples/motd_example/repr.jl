@@ -1,18 +1,8 @@
-using motd_example, AVRCompiler
-using AVRCompiler.GPUCompiler, AVRCompiler.LLVM
+using motd_example, AVRCompiler, AVRDevices
+using AVRCompiler.GPUCompiler, AVRCompiler.LLVM, AVRDevices.ATmega328p.Serial
 
-job = AVRCompiler.native_job(motd_example.main, (), AVRCompiler.ArduinoParams("unnamed"))
-mi,_ = GPUCompiler.emit_julia(job)
+job = AVRCompiler.native_job(Serial._write, (USART0{0x08}, Base.CodeUnits{UInt8, String}), AVRCompiler.ArduinoParams("unnamed"))
+mi,_ = GPUCompiler.emit_julia(job; validate=false)
 GPUCompiler.code_llvm(job; optimize=true, dump_module=true)
-ctx=JuliaContext()
-res = GPUCompiler.compile_method_instance(job, mi; ctx)[1]
-getobj(res) = for (i,b) in enumerate(blocks(first(functions(res))))
-    i == 10 && for (j,instr) in enumerate(instructions(b))
-        j == 12 && begin
-            @show instr
-            @show instr.ref
-            ccall(:jl_breakpoint, Cvoid, (Any,), instr.ref)
-        end
-    end
-end
-getobj(res)
+# ctx=JuliaContext()
+# res = GPUCompiler.compile_method_instance(job, mi; ctx)[1]
